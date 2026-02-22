@@ -8,10 +8,6 @@
 # 2. Go to Render Dashboard → New → Blueprint
 # 3. Connect your repository
 # 4. Render will automatically create all services
-#
-# IMPORTANT: Set these environment variables in Render Dashboard:
-# - MONGODB_URI: Your MongoDB Atlas connection string
-# - JWT_SECRET: A secure random string for JWT tokens
 # ============================================
 
 services:
@@ -29,8 +25,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: FLASK_ENV
-        value: production
     healthCheckPath: /health
 
   # ============================================
@@ -47,12 +41,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3001
       - key: MONGODB_URI
-        sync: false  # Set manually in Render Dashboard
+        sync: false
       - key: JWT_SECRET
-        generateValue: true  # Auto-generate secure secret
+        generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: ML_API_URL
@@ -77,16 +69,3 @@ services:
         value: production
       - key: REACT_APP_API_URL
         value: https://placement-ai-backend.onrender.com
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-# ============================================
-# Optional: Add a Redis instance for caching
-# ============================================
-# - type: redis
-#   name: placement-ai-redis
-#   region: oregon
-#   plan: free
-#   maxmemoryPolicy: allkeys-lru
