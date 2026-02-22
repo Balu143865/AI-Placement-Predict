@@ -1,0 +1,92 @@
+# ============================================
+# Render Blueprint - AI Placement Readiness Predictor
+# ============================================
+# This file enables one-click deployment to Render
+# 
+# Usage:
+# 1. Push this file to your GitHub repository
+# 2. Go to Render Dashboard → New → Blueprint
+# 3. Connect your repository
+# 4. Render will automatically create all services
+#
+# IMPORTANT: Set these environment variables in Render Dashboard:
+# - MONGODB_URI: Your MongoDB Atlas connection string
+# - JWT_SECRET: A secure random string for JWT tokens
+# ============================================
+
+services:
+  # ============================================
+  # ML Model Service (Python Flask)
+  # ============================================
+  - type: web
+    name: placement-ai-ml
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: ml-model
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production
+    healthCheckPath: /health
+
+  # ============================================
+  # Backend API Service (Node.js)
+  # ============================================
+  - type: web
+    name: placement-ai-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: MONGODB_URI
+        sync: false  # Set manually in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Auto-generate secure secret
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: ML_API_URL
+        value: https://placement-ai-ml.onrender.com
+      - key: CLIENT_URL
+        value: https://placement-ai-frontend.onrender.com
+    healthCheckPath: /api/health
+
+  # ============================================
+  # Frontend Service (React)
+  # ============================================
+  - type: web
+    name: placement-ai-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: client
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_API_URL
+        value: https://placement-ai-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# ============================================
+# Optional: Add a Redis instance for caching
+# ============================================
+# - type: redis
+#   name: placement-ai-redis
+#   region: oregon
+#   plan: free
+#   maxmemoryPolicy: allkeys-lru
