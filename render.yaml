@@ -8,7 +8,7 @@ services:
   # ============================================
   - type: web
     name: placement-ai-ml
-    runtime: python
+    env: python
     region: oregon
     plan: free
     rootDir: ml-model
@@ -17,14 +17,13 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-    healthCheckPath: /health
 
   # ============================================
   # Backend API Service (Node.js)
   # ============================================
   - type: web
     name: placement-ai-backend
-    runtime: node
+    env: node
     region: oregon
     plan: free
     rootDir: server
@@ -43,14 +42,13 @@ services:
         value: https://placement-ai-ml.onrender.com
       - key: CLIENT_URL
         value: https://placement-ai-frontend.onrender.com
-    healthCheckPath: /api/health
 
   # ============================================
-  # Frontend Service (React - Static Site)
+  # Frontend Service (React)
   # ============================================
   - type: web
     name: placement-ai-frontend
-    runtime: node
+    env: node
     region: oregon
     plan: free
     rootDir: client
