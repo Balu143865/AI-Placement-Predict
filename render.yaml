@@ -1,14 +1,6 @@
 # ============================================
 # Render Blueprint - AI Placement Readiness Predictor
 # ============================================
-# This file enables one-click deployment to Render
-# 
-# Usage:
-# 1. Push this file to your GitHub repository
-# 2. Go to Render Dashboard → New → Blueprint
-# 3. Connect your repository
-# 4. Render will automatically create all services
-# ============================================
 
 services:
   # ============================================
@@ -54,7 +46,7 @@ services:
     healthCheckPath: /api/health
 
   # ============================================
-  # Frontend Service (React)
+  # Frontend Service (React - Static Site)
   # ============================================
   - type: web
     name: placement-ai-frontend
