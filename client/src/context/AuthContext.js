@@ -57,18 +57,20 @@ export const AuthProvider = ({ children }) => {
         password
       });
 
-      const { user: newUser, token: newToken } = response.data.data;
+      // Handle both response formats (with and without 'data' wrapper)
+      const userData = response.data.data?.user || response.data.user;
+      const newToken = response.data.data?.token || response.data.token;
       
       // Save to localStorage
       localStorage.setItem('token', newToken);
       
       // Update state
-      setUser(newUser);
+      setUser(userData);
       setToken(newToken);
 
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed';
+      const message = err.response?.data?.error || err.response?.data?.message || 'Registration failed';
       setError(message);
       return { success: false, message };
     }
@@ -86,18 +88,20 @@ export const AuthProvider = ({ children }) => {
         password
       });
 
-      const { user: loggedInUser, token: newToken } = response.data.data;
+      // Handle both response formats (with and without 'data' wrapper)
+      const userData = response.data.data?.user || response.data.user;
+      const newToken = response.data.data?.token || response.data.token;
       
       // Save to localStorage
       localStorage.setItem('token', newToken);
       
       // Update state
-      setUser(loggedInUser);
+      setUser(userData);
       setToken(newToken);
 
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Login failed';
+      const message = err.response?.data?.error || err.response?.data?.message || 'Login failed';
       setError(message);
       return { success: false, message };
     }
