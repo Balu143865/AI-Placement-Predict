@@ -18,7 +18,8 @@ import json
 # ============================================
 # APP CONFIGURATION
 # ============================================
-app = Flask(__name__, static_folder='build')
+# Static folder is client/build after React build
+app = Flask(__name__, static_folder='client/build')
 
 # Enable CORS for development
 CORS(app)
@@ -36,8 +37,25 @@ sessions_db = {}
 # ============================================
 # LOAD ML MODEL
 # ============================================
-MODEL_PATH = 'placement_model.joblib'
-SCALER_PATH = 'scaler.joblib'
+# Try multiple paths for model files
+MODEL_PATHS = [
+    'placement_model.joblib',
+    'ml-model/placement_model.joblib'
+]
+SCALER_PATHS = [
+    'scaler.joblib',
+    'ml-model/scaler.joblib'
+]
+
+def find_file(paths):
+    """Find first existing file from list of paths"""
+    for path in paths:
+        if os.path.exists(path):
+            return path
+    return None
+
+MODEL_PATH = find_file(MODEL_PATHS) or 'placement_model.joblib'
+SCALER_PATH = find_file(SCALER_PATHS) or 'scaler.joblib'
 
 def load_model():
     """Load the trained model and scaler"""

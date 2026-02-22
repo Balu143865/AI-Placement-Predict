@@ -13,16 +13,16 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-      cd client && npm install && npm run build && cp -r build ../build
-      cp ml-model/*.joblib .
-      cp ml-model/dataset.csv .
-    startCommand: gunicorn unified_app:app
+    buildCommand: pip install -r requirements.txt && cd client && npm install && npm run build && cd ..
+    startCommand: python unified_app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: NODE_VERSION
+        value: 18
       - key: SECRET_KEY
         generateValue: true
       - key: FLASK_ENV
         value: production
+      - key: PORT
+        value: 10000
