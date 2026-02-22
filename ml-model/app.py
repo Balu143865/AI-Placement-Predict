@@ -523,4 +523,10 @@ if __name__ == '__main__':
     print("Starting Placement Prediction ML API v2.0...")
     print("Features: Readiness Score, Skill Gap Analyzer, Smart Roadmap Generator")
     print("Model loaded successfully!")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    # Use PORT from environment variable (required for Render deployment)
+    port = int(os.environ.get('PORT', 5000))
+    # Disable debug mode in production
+    debug_mode = os.environ.get('FLASK_ENV', 'development') == 'development'
+    
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
