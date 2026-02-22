@@ -81,8 +81,8 @@ function Predictor() {
       // Get auth token
       const token = localStorage.getItem('token');
       
-      // Use environment variable for API URL
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      // Use relative URLs for unified deployment
+      const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:3001');
       
       const response = await axios.post(`${API_URL}/api/predict`, {
         cgpa: parseFloat(formData.cgpa),

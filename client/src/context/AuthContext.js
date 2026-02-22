@@ -13,8 +13,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Configure axios defaults - use environment variable for production
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+  // Configure axios defaults - use relative URLs for unified deployment
+  // In production, frontend and backend are served from the same domain
+  const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:3001');
 
   // Check if user is logged in on mount
   useEffect(() => {

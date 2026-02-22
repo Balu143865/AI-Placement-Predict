@@ -1,61 +1,28 @@
 # ============================================
-# Render Blueprint - AI Placement Readiness Predictor
+# Render Blueprint - Unified Single Deployment
+# ============================================
+# One service that serves everything:
+# - ML API
+# - Backend API
+# - React Frontend
 # ============================================
 
 services:
-  # ============================================
-  # ML Model Service (Python Flask)
-  # ============================================
   - type: web
-    name: placement-ai-ml
+    name: ai-placement-predictor
     env: python
     region: oregon
     plan: free
-    rootDir: ml-model
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    buildCommand: |
+      pip install -r requirements.txt
+      cd client && npm install && npm run build && cp -r build ../build
+      cp ml-model/*.joblib .
+      cp ml-model/dataset.csv .
+    startCommand: gunicorn unified_app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-
-  # ============================================
-  # Backend API Service (Node.js)
-  # ============================================
-  - type: web
-    name: placement-ai-backend
-    env: node
-    region: oregon
-    plan: free
-    rootDir: server
-    buildCommand: npm install
-    startCommand: node server.js
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: MONGODB_URI
-        sync: false
-      - key: JWT_SECRET
+      - key: SECRET_KEY
         generateValue: true
-      - key: JWT_EXPIRES_IN
-        value: 7d
-      - key: ML_API_URL
-        value: https://placement-ai-ml.onrender.com
-      - key: CLIENT_URL
-        value: https://placement-ai-frontend.onrender.com
-
-  # ============================================
-  # Frontend Service (React)
-  # ============================================
-  - type: web
-    name: placement-ai-frontend
-    env: node
-    region: oregon
-    plan: free
-    rootDir: client
-    buildCommand: npm install && npm run build
-    startCommand: npx serve -s build
-    envVars:
-      - key: NODE_ENV
+      - key: FLASK_ENV
         value: production
-      - key: REACT_APP_API_URL
-        value: https://placement-ai-backend.onrender.com
