@@ -13,11 +13,13 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && cd client && npm install && npm run build && cd .. && cp ml-model/placement_model.joblib . && cp ml-model/scaler.joblib .
     startCommand: python unified_app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: NODE_VERSION
+        value: 18.17.0
       - key: SECRET_KEY
         generateValue: true
       - key: FLASK_ENV
