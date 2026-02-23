@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
 
   // Configure axios defaults - use relative URLs for unified deployment
   // In production, frontend and backend are served from the same domain
-  const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:3001');
+  const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
 
   // Check if user is logged in on mount
   useEffect(() => {

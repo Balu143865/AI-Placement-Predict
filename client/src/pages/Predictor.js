@@ -82,7 +82,7 @@ function Predictor() {
       const token = localStorage.getItem('token');
       
       // Use relative URLs for unified deployment
-      const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:3001');
+      const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
       
       const response = await axios.post(`${API_URL}/api/predict`, {
         cgpa: parseFloat(formData.cgpa),

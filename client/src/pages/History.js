@@ -47,7 +47,7 @@ const History = () => {
 
   // Use relative URLs for unified deployment
   // In production, frontend and backend are served from the same domain
-  const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:3001');
+  const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
 
   const fetchHistory = async () => {
     try {
@@ -94,7 +94,7 @@ const History = () => {
     }
   };
 
-  // Chart configuration - with safety checks
+  // Chart configuration - Modern aesthetic with gradients
   const chartData = analytics && analytics.trend && Array.isArray(analytics.trend) && analytics.trend.length > 0 ? {
     labels: analytics.trend.map((item, index) => `#${index + 1}`),
     datasets: [
@@ -102,14 +102,29 @@ const History = () => {
         label: 'Readiness Score',
         data: analytics.trend.map(item => item.score ?? 0),
         fill: true,
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+          gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.2)');
+          gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+          return gradient;
+        },
         borderColor: '#6366f1',
         borderWidth: 3,
-        pointBackgroundColor: '#6366f1',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 6,
-        pointHoverRadius: 8,
+        pointBackgroundColor: (context) => {
+          const score = context.raw;
+          if (score >= 75) return '#4ade80';
+          if (score >= 50) return '#fbbf24';
+          return '#f87171';
+        },
+        pointBorderColor: '#1a1a2e',
+        pointBorderWidth: 3,
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#6366f1',
+        pointHoverBorderWidth: 3,
         tension: 0.4
       }
     ]
@@ -118,43 +133,74 @@ const History = () => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
         display: false
       },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
         titleColor: '#fff',
         bodyColor: '#fff',
         borderColor: '#6366f1',
-        borderWidth: 1,
-        padding: 12,
+        borderWidth: 2,
+        padding: 16,
+        cornerRadius: 12,
         displayColors: false,
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
         callbacks: {
-          label: (context) => `Score: ${context.parsed.y.toFixed(1)}%`
+          title: (context) => `Prediction ${context[0].label}`,
+          label: (context) => {
+            const score = context.parsed.y;
+            let status = score >= 75 ? '🟢 Strong' : score >= 50 ? '🟡 Moderate' : '🔴 Needs Work';
+            return [`Score: ${score.toFixed(1)}%`, `Status: ${status}`];
+          }
         }
       }
     },
     scales: {
       x: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.05)'
+          color: 'rgba(255, 255, 255, 0.03)',
+          drawBorder: false
         },
         ticks: {
-          color: '#9ca3af'
+          color: '#6b7280',
+          font: {
+            size: 12,
+            weight: '500'
+          }
         }
       },
       y: {
         min: 0,
         max: 100,
         grid: {
-          color: 'rgba(255, 255, 255, 0.05)'
+          color: 'rgba(255, 255, 255, 0.05)',
+          drawBorder: false
         },
         ticks: {
-          color: '#9ca3af',
-          callback: (value) => `${value}%`
+          color: '#6b7280',
+          font: {
+            size: 12
+          },
+          callback: (value) => `${value}%`,
+          stepSize: 20
         }
       }
+    },
+    animation: {
+      duration: 1000,
+      easing: 'easeOutQuart'
     }
   };
 

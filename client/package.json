@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend for AI Powered Placement Readiness Predictor",
   "private": true,
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "axios": "^1.6.2",
     "chart.js": "^4.4.1",
