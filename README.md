@@ -6,6 +6,8 @@ A modern full-stack web application that predicts student placement probability 
 
 This application helps students understand their placement readiness by analyzing their academic and skill data. It uses a Logistic Regression model to predict placement probability and provides actionable recommendations for improvement.
 
+## project URL: https://ai-placement-predictor-dv1b.onrender.com
+
 **Version 4.0 - Viral UI + Deploy Ready** now features a stunning modern landing page, glassmorphism UI, smooth animations, and production deployment configuration!
 
 ## ✨ What's New in v4.0
