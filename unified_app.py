@@ -163,6 +163,10 @@ def get_recommendation_level(score):
 def analyze_skill_gaps(data):
     """Analyze skill gaps and provide recommendations"""
     gaps = {}
+    skill_gaps_list = []
+    scores = {}
+    ideal_scores = {}
+    
     for feature in FEATURE_NAMES:
         ideal = IDEAL_SKILLS.get(feature, 0)
         actual = data.get(feature, 0)
@@ -170,27 +174,36 @@ def analyze_skill_gaps(data):
         if feature == 'cgpa':
             gap = max(0, (ideal - actual) / 10.0 * 100)
             score = min(100, (actual / 10.0) * 100)
+            ideal_score = 80  # 8.0 CGPA = 80%
         elif feature == 'dsa_score':
             gap = max(0, ideal - actual)
             score = min(100, actual)
+            ideal_score = 70
         elif feature == 'communication':
             gap = max(0, (ideal - actual) / 10.0 * 100)
             score = min(100, (actual / 10.0) * 100)
+            ideal_score = 70
         elif feature == 'projects':
             gap = max(0, ideal - actual)
             score = min(100, (actual / 5.0) * 100)
+            ideal_score = 60
         else:  # internships
             gap = max(0, ideal - actual)
             score = min(100, (actual / 3.0) * 100)
+            ideal_score = 67
         
         if score >= 80:
             status = 'Strong'
+            severity = 'Low'
         elif score >= 60:
             status = 'Good'
+            severity = 'Low'
         elif score >= 40:
             status = 'Average'
+            severity = 'Medium'
         else:
             status = 'Needs Work'
+            severity = 'High'
         
         gaps[feature] = {
             'score': round(score, 1),
@@ -199,8 +212,21 @@ def analyze_skill_gaps(data):
             'ideal': ideal,
             'actual': actual
         }
+        
+        # Add to scores dict for chart
+        scores[feature] = round(score, 1)
+        ideal_scores[feature] = ideal_score
+        
+        # Add to skill_gaps list for Dashboard component
+        skill_gaps_list.append({
+            'skill': FEATURE_LABELS.get(feature, feature),
+            'current': actual,
+            'ideal': ideal,
+            'gap': round(gap, 1),
+            'severity': severity
+        })
     
-    return gaps
+    return gaps, scores, ideal_scores, skill_gaps_list
 
 def generate_roadmap(gaps):
     """Generate personalized learning roadmap"""
@@ -219,7 +245,9 @@ def generate_roadmap(gaps):
                     'category': 'DSA',
                     'priority': 'High' if data['gap'] > 30 else 'Medium',
                     'duration': '2 hours',
-                    'duration_days': 30
+                    'duration_days': 30,
+                    'skill_focus': 'Data Structures & Algorithms',
+                    'expected_improvement': f"+{min(data['gap'], 20)}% DSA proficiency in 30 days"
                 })
                 day += 1
             elif feature == 'communication':
@@ -229,7 +257,9 @@ def generate_roadmap(gaps):
                     'category': 'Communication',
                     'priority': 'High' if data['gap'] > 20 else 'Medium',
                     'duration': '1 hour',
-                    'duration_days': 21
+                    'duration_days': 21,
+                    'skill_focus': 'Communication & Soft Skills',
+                    'expected_improvement': f"+{min(data['gap'], 15)}% communication skills in 21 days"
                 })
                 day += 1
             elif feature == 'projects':
@@ -239,27 +269,33 @@ def generate_roadmap(gaps):
                     'category': 'Projects',
                     'priority': 'Medium',
                     'duration': '4 hours/week',
-                    'duration_days': 14
+                    'duration_days': 14,
+                    'skill_focus': 'Project Development',
+                    'expected_improvement': '1 complete project in 2 weeks'
                 })
                 day += 1
             elif feature == 'internships':
                 roadmap.append({
                     'day': day,
                     'task': f"Apply for internships on LinkedIn/Internshala",
-                    'category': 'Internships',
+                    'category': 'Career',
                     'priority': 'High' if data['gap'] > 1 else 'Medium',
                     'duration': '30 min daily',
-                    'duration_days': 7
+                    'duration_days': 7,
+                    'skill_focus': 'Professional Experience',
+                    'expected_improvement': '5-10 internship applications per week'
                 })
                 day += 1
             elif feature == 'cgpa':
                 roadmap.append({
                     'day': day,
                     'task': f"Focus on academics to improve CGPA",
-                    'category': 'Academics',
+                    'category': 'Academic',
                     'priority': 'Medium',
                     'duration': '2 hours daily',
-                    'duration_days': 60
+                    'duration_days': 60,
+                    'skill_focus': 'Academic Performance',
+                    'expected_improvement': '+0.5 CGPA improvement possible'
                 })
                 day += 1
     
@@ -358,6 +394,73 @@ def get_profile():
 # ============================================
 # API ROUTES - PREDICTION
 # ============================================
+def generate_ai_recommendations(data, skill_gaps, readiness_score):
+    """Generate AI-powered recommendations based on profile analysis"""
+    recommendations = []
+    
+    # CGPA recommendations
+    if data['cgpa'] < 7.0:
+        recommendations.append("Focus on improving your CGPA. Aim for consistent study schedules and seek help in challenging subjects.")
+    elif data['cgpa'] < 8.0:
+        recommendations.append("Your CGPA is decent. Continue maintaining it while focusing on practical skills.")
+    else:
+        recommendations.append("Excellent CGPA! Maintain your academic performance while building practical skills.")
+    
+    # DSA recommendations
+    if data['dsa_score'] < 50:
+        recommendations.append("Start practicing DSA problems daily. Begin with arrays and strings, then progress to trees and graphs.")
+    elif data['dsa_score'] < 70:
+        recommendations.append("Good DSA foundation! Challenge yourself with medium-level problems on LeetCode.")
+    else:
+        recommendations.append("Strong DSA skills! Focus on optimization and advanced data structures.")
+    
+    # Projects recommendations
+    if data['projects'] < 2:
+        recommendations.append("Build at least 2-3 projects to showcase your skills. Include both frontend and backend work.")
+    elif data['projects'] < 4:
+        recommendations.append("Good project count! Consider adding a complex project that demonstrates system design.")
+    else:
+        recommendations.append("Excellent project portfolio! Focus on quality over quantity and add documentation.")
+    
+    # Communication recommendations
+    if data['communication'] < 5:
+        recommendations.append("Practice English speaking daily. Use apps like Duolingo and participate in group discussions.")
+    elif data['communication'] < 7:
+        recommendations.append("Work on presentation skills and mock interviews to boost confidence.")
+    else:
+        recommendations.append("Strong communication skills! Practice technical explanations and system design discussions.")
+    
+    # Internship recommendations
+    if data['internships'] == 0:
+        recommendations.append("Apply for internships on LinkedIn, Internshala, and company career pages. Start with startups.")
+    elif data['internships'] < 2:
+        recommendations.append("Good start! Try to get another internship in a different domain for diverse experience.")
+    else:
+        recommendations.append("Great internship experience! Focus on getting PPO offers or referrals from your network.")
+    
+    # Overall recommendation based on readiness score
+    if readiness_score < 50:
+        recommendations.append("Your overall profile needs significant improvement. Create a daily study plan and track progress.")
+    elif readiness_score < 70:
+        recommendations.append("You're on the right track! Focus on your weak areas and maintain consistency.")
+    else:
+        recommendations.append("Strong profile! Start applying to companies and prepare for interviews.")
+    
+    return recommendations[:6]  # Return top 6 recommendations
+
+def get_placement_category(probability, readiness_score):
+    """Determine placement category based on probability and readiness"""
+    combined_score = (probability * 0.6) + (readiness_score * 0.4)
+    
+    if combined_score >= 75:
+        return "Tier 1 Companies (Google, Microsoft, Amazon)"
+    elif combined_score >= 60:
+        return "Tier 2 Companies (Service-based & Mid-size Product)"
+    elif combined_score >= 45:
+        return "Tier 3 Companies (Startups & Local Companies)"
+    else:
+        return "Need Significant Improvement"
+
 @app.route('/api/predict', methods=['POST'])
 def predict():
     """Make placement prediction"""
@@ -398,11 +501,17 @@ def predict():
         # Get recommendation level
         recommendation = get_recommendation_level(readiness_score)
         
-        # Analyze skill gaps
-        skill_gaps = analyze_skill_gaps(data)
+        # Analyze skill gaps - updated to use new return values
+        skill_gaps, scores, ideal_scores, skill_gaps_list = analyze_skill_gaps(data)
         
         # Generate roadmap
         roadmap = generate_roadmap(skill_gaps)
+        
+        # Generate AI recommendations
+        ai_recommendations = generate_ai_recommendations(data, skill_gaps, readiness_score)
+        
+        # Get placement category
+        placement_category = get_placement_category(placement_probability, readiness_score)
         
         # Find weakest and strongest skills
         sorted_skills = sorted(skill_gaps.items(), key=lambda x: x[1]['score'])
@@ -427,9 +536,15 @@ def predict():
             'placement_probability': placement_probability,
             'readiness_score': readiness_score,
             'recommendation_level': recommendation,
-            'skill_analysis': skill_gaps,
+            'skill_analysis': {
+                'scores': scores,
+                'ideal_scores': ideal_scores,
+                'skill_gaps': skill_gaps_list
+            },
             'weakest_skill': FEATURE_LABELS.get(weakest, weakest),
             'strongest_skill': FEATURE_LABELS.get(strongest, strongest),
+            'placement_category': placement_category,
+            'ai_recommendations': ai_recommendations,
             'roadmap_tasks': roadmap,
             'saved_to_history': True
         }), 200
